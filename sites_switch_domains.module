@@ -13,10 +13,12 @@ function sites_switch_domains_hosting_tasks() {
   $tasks = array();
 
   $tasks['platform']['switch_domain'] = array(
-    'title' => t('Switch Domains'),
-    'description' => t('Migrate sites to a new domain.'),
-    'page arguments' => array('sites_switch_domains_form', 1),
-    'dialog' => TRUE,
+    'title'           => t('Switch Domains'),
+    'description'     => t('Migrate sites to a new domain.'),
+    'page arguments'  => array('sites_switch_domains_form', 1),
+    'access callback' => 'sites_switch_domains_access',
+    'access callback' => array(1, 'create switch_domain task'),
+    'dialog'          => TRUE,
   );
 
   return $tasks;
@@ -27,6 +29,25 @@ function sites_switch_domains_hosting_tasks() {
  */
 function sites_switch_domains_perm() {
   return array('create switch_domain task');
+}
+
+/**
+ * Access callback for our task
+ */
+function sites_switch_domains_access($node, $task) {
+  // Is platform
+  // Has permissions
+  // Is enabled and not deleted
+  if ($node->type == 'platform' && user_access('create switch_domain task')) {
+    if (
+      $node->platform_status != HOSTING_PLATFORM_LOCKED &&
+      $node->platform_status != HOSTING_PLATFORM_DELETED
+    ) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
 }
 
 /**
