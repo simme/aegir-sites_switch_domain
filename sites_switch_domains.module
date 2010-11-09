@@ -26,7 +26,7 @@ function sites_switch_domains_hosting_tasks() {
  * Implementation of hook_perm().
  */
 function sites_switch_domains_perm() {
-  return array('switch_domain');
+  return array('create switch_domain task');
 }
 
 /**
