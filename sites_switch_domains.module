@@ -23,6 +23,13 @@ function sites_switch_domains_hosting_tasks() {
 }
 
 /**
+ * Implementation of hook_perm().
+ */
+function sites_switch_domains_perm() {
+  return array('switch_domain');
+}
+
+/**
  * Creates the form with input for regexps
  */
 function sites_switch_domains_form($form_state, $platform) {
