@@ -1,0 +1,98 @@
+<?php
+/**
+ * @file
+ *  Move all sites on a platform to new a new domain.
+ *  Helpful if you're running an Aegir install where the sites
+ *  are subdomains to another domain, and that domain changes.
+ */
+
+/**
+ * Implementation of hook_hosting_tasks()
+ */
+function sites_switch_domains_hosting_tasks() {
+  $tasks = array();
+
+  $tasks['platform']['switch_domain'] = array(
+    'title' => t('Switch Domains'),
+    'description' => t('Migrate sites to a new domain.'),
+    'page arguments' => array('sites_switch_domains_form', 1),
+    'dialog' => TRUE,
+  );
+
+  return $tasks;
+}
+
+/**
+ * Creates the form with input for regexps
+ */
+function sites_switch_domains_form($form_state, $platform) {
+  $form = array();
+
+  $form['match_pattern'] = array(
+    '#type'         => 'textfield',
+    '#title'        => t('Pattern to match'),
+    '#default_value'=> '([a-z]+)\.(nyaskane\.com)',
+  );
+
+  $form['replace_pattern'] = array(
+    '#type'         => 'textfield',
+    '#title'        => t('Pattern to use for replacement'),
+    '#default_value'=> '$1.skane.com',
+  );
+
+  $form['platform_id'] = array(
+    '#type'         => 'hidden',
+    '#value'        => $platform->nid,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+}
+
+/**
+ * Load all sites in the platform into the batch api and then run it against
+ * the provided patterns.
+ */
+function sites_switch_domains_form_submit($form, &$form_state) {
+  $platform = $form_state['values']['platform_id'];
+  $match    = $form_state['values']['match_pattern'];
+  $replace  = $form_state['values']['replace_pattern'];
+
+  $batch = array(
+    'title'             => 'Comparing sites with the provided pattern',
+    'operations'        => array(),
+    'finished'          => 'sites_switch_domains_compare',
+    'init_message'      => 'Warming up the engines',
+    'progress_message'  => 'Compared and switched @current of @total sites.',
+    'error_message'     => 'Something went wrong, and I do not know why... :(',
+  );
+
+  $sites = db_query("SELECT nid FROM {hosting_site}
+    WHERE platform = %d", array(':platform' => $platform));
+
+  // Add one operation per site
+  while ($site = db_fetch_object($sites)) {
+    $batch['operations'][] = array(
+      'sites_switch_domains_execute',
+      array($site->nid, $match, $execute)
+    );
+  }
+
+  // Tip the first domino.
+  batch_set($batch);
+}
+
+/**
+ * Do the actual compare and create migration task if it's a match.
+ */
+function sites_switch_domains_execute($nid, $match, $replace) {
+  $site = node_load($nid, NULL, TRUE);
+
+  // Create new migrate task if we have a match
+  if (preg_match($match_pattern, $site)) {
+    $new_domain = preg_replace($match_pattern, $replace_pattern, $site->title);
+    drupal_set_message($new_domain);
+  }
+}

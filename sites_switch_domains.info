@@ -1,0 +1,4 @@
+name = Sites Switch Domains
+description = Let's you easily change domain names on multiplte sites with the help of regexp.
+core = 6.x
+package = Utilites
