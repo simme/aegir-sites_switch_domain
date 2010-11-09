@@ -35,6 +35,7 @@ function sites_switch_domains_perm() {
  * Access callback for our task
  */
 function sites_switch_domains_access($node, $task) {
+  var_dump($node); var_dump($task); die;
   // TODO: security
   return TRUE;
 }
