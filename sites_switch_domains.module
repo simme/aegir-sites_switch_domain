@@ -65,6 +65,8 @@ function sites_switch_domains_form($form_state, $platform) {
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
+
+  return $form;
 }
 
 /**
