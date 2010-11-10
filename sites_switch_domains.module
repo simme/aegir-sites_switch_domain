@@ -15,7 +15,6 @@ function sites_switch_domains_hosting_tasks() {
   $tasks['platform']['switch_domain'] = array(
     'title'             => t('Switch Domains'),
     'description'       => t('Migrate sites to a new domain.'),
-    'page callback'     => 'drupal_get_form',
     'page arguments'    => array('sites_switch_domains_form', 1),
     'access callback'   => 'sites_switch_domains_access',
     'access arguments'  => array(1, 'create switch_domain task'),
